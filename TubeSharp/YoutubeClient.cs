@@ -3,14 +3,19 @@ using TubeSharp.Videos;
 
 namespace TubeSharp;
 
+/// <inheritdoc/>
 public class YoutubeClient : IDisposable
 {
     private const string ApiKey = "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";
     private readonly HttpClient _client;
 
+    /// <inheritdoc/>
     public VideosEngine Videos { get; }
+
+    /// <inheritdoc/>
     public SearchEngine Search { get; }
 
+    /// <inheritdoc/>
     public YoutubeClient() 
     {
         _client = new();
@@ -22,6 +27,7 @@ public class YoutubeClient : IDisposable
         Search = new(_client, ApiKey);
     }
 
+    /// <inheritdoc/>
     public YoutubeClient(HttpClient httpClient) 
     {
         _client = httpClient;
@@ -29,6 +35,7 @@ public class YoutubeClient : IDisposable
         Search = new(_client, ApiKey);
     }
 
+    /// <inheritdoc/>
     public void Dispose()
     {
         _client?.Dispose();

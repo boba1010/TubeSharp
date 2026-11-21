@@ -2,6 +2,7 @@
 
 namespace TubeSharp.Search;
 
+/// <inheritdoc/>
 public sealed record PlaylistSearchResult(
     string Id,
     string Title,
@@ -9,5 +10,6 @@ public sealed record PlaylistSearchResult(
     int VideoCount,
     string ThumbnailUrl) : ISearchResult
 {
+    /// <inheritdoc/>
     public string Url => $"https://youtube.com{Id}";
 }

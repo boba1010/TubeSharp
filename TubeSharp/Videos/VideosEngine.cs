@@ -6,11 +6,13 @@ using TubeSharp.Requests;
 
 namespace TubeSharp.Videos;
 
+/// <inheritdoc/>
 public sealed class VideosEngine(HttpClient httpClient, string apiKey)
 {
     private readonly string _nextUrl = $"https://youtubei.googleapis.com/youtubei/v1/next?key={apiKey}";
     private readonly string _playerUrl = $"https://youtubei.googleapis.com/youtubei/v1/player?key={apiKey}";
 
+    /// <inheritdoc/>
     public async Task<YoutubeVideo?> GetYoutubeVideoAsync(string id, CancellationToken cancellationToken = default)
     {
         var request = new YoutubeVideoRequest(id);

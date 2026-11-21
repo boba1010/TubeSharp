@@ -4,12 +4,16 @@ using System.Text.Encodings.Web;
 
 namespace TubeSharp.Json;
 
+/// <inheritdoc/>
 public sealed class UnescapedEmojiJsonEncoder : JavaScriptEncoder
 {
+    /// <inheritdoc/>
     public static UnescapedEmojiJsonEncoder Instance { get; } = new();
 
+    /// <inheritdoc/>
     public override int MaxOutputCharactersPerInputCharacter => 12;
 
+    /// <inheritdoc/>
     public override bool WillEncode(int unicodeScalar)
     {
         // Never encode supplementary plane characters (emojis >= U+10000)
@@ -20,6 +24,7 @@ public sealed class UnescapedEmojiJsonEncoder : JavaScriptEncoder
         return UnsafeRelaxedJsonEscaping.WillEncode(unicodeScalar);
     }
 
+    /// <inheritdoc/>
     public override unsafe int FindFirstCharacterToEncode(char* text, int textLength)
     {
         for (int i = 0; i < textLength; i++)
@@ -40,6 +45,7 @@ public sealed class UnescapedEmojiJsonEncoder : JavaScriptEncoder
         return -1;
     }
 
+    /// <inheritdoc/>
     public override unsafe bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
     {
         if (unicodeScalar >= 0x10000)
@@ -58,6 +64,7 @@ public sealed class UnescapedEmojiJsonEncoder : JavaScriptEncoder
         return UnsafeRelaxedJsonEscaping.TryEncodeUnicodeScalar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten);
     }
 
+    /// <inheritdoc/>
     public override OperationStatus EncodeUtf8(
         ReadOnlySpan<byte> utf8Source,
         Span<byte> utf8Destination,

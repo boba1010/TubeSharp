@@ -1,7 +1,9 @@
 ﻿namespace TubeSharp.Channels;
 
+/// <inheritdoc/>
 public sealed record class YoutubeChannel(string Id, string Name, string Handle, string Subscribers, string AvatarUrl)
 {
+    /// <inheritdoc/>
     public string Url
     {
         get

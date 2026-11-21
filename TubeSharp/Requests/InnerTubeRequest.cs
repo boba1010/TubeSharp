@@ -14,7 +14,7 @@ internal sealed class YoutubeSearchRequest(string query, string? filterParams = 
     public YoutubeContext Context { get; } = new();
 }
 
-public static class SearchFilters
+internal static class SearchFilters
 {
     public const string Videos = "EgIQAQ%3D%3D";
     public const string Channels = "EgIQAg%3D%3D";

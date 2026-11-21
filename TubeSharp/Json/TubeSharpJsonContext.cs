@@ -6,6 +6,7 @@ using TubeSharp.Videos;
 
 namespace TubeSharp.Json;
 
+/// <inheritdoc/>
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase, WriteIndented = true)]
 [JsonSerializable(typeof(YoutubeVideo))]
 [JsonSerializable(typeof(YoutubeChannel))]
@@ -16,6 +17,7 @@ namespace TubeSharp.Json;
 [JsonSerializable(typeof(List<ISearchResult>))]
 public sealed partial class TubeSharpJsonContext : JsonSerializerContext
 {
+    /// <inheritdoc/>
     public static TubeSharpJsonContext Readable { get; } = new(new JsonSerializerOptions
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,

@@ -5,16 +5,20 @@ using TubeSharp.Requests;
 
 namespace TubeSharp.Search;
 
+/// <inheritdoc/>
 public sealed class SearchEngine(HttpClient httpClient, string apiKey)
 {
     private readonly string _url = $"https://youtubei.googleapis.com/youtubei/v1/search?key={apiKey}";
 
+    /// <inheritdoc/>
     public Task<SearchPage> SearchAsync(string query, string? filter = null, CancellationToken cancellationToken = default)
         => ExecuteSearchAsync(new YoutubeSearchRequest(query, filter), cancellationToken);
 
+    /// <inheritdoc/>
     public Task<SearchPage> GetNextPageAsync(string continuationToken, CancellationToken cancellationToken = default)
         => ExecuteSearchAsync(new YoutubeSearchRequest("", continuation: continuationToken), cancellationToken);
 
+    /// <inheritdoc/>
     public async IAsyncEnumerable<ISearchResult> GetSearchResultRangeAsync(
         string query, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
