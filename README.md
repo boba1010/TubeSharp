@@ -18,6 +18,30 @@ TubeSharp is designed around metadata retrieval and parsing. It does not provide
 - **NativeAOT compatibility:** Uses source-generated JSON serialization and avoids requiring runtime reflection for request serialization.
 - **HttpClient integration:** Supports both internally managed and externally supplied HttpClient instances.
 
+## Performance & Network Optimization
+
+Starting with **26.11.1.0-EA**, TubeSharp introduces aggressive network optimizations using YouTube Innertube field filtering.
+
+Instead of retrieving entire API responses, TubeSharp requests only the response fields required for metadata extraction.
+
+### Network Benchmarks
+
+| Endpoint | Original Payload | Optimized Payload | Reduction |
+|---|---:|---:|---:|
+| Video metadata (`/next`) | ~1.2 MB | **2.77 KB** | **~99.77%** |
+| Search (`/search`) | ~2.61 MB | **47 KB** | **~98.2%** |
+
+### Optimization Results
+
+- **Video metadata:** Approximately 433× less response data.
+- **Search:** Approximately 55× less response data.
+- **Reduced JSON processing:** Unnecessary response data is filtered out before reaching the parser.
+- **Lower memory pressure:** Smaller response payloads can reduce buffering and JSON-processing memory requirements.
+
+These measurements represent observed response payload sizes and are approximate. Actual payload sizes may vary depending on the requested content.
+
+*Memory allocations, CPU usage, and parsing throughput have not yet been independently benchmarked.*
+
 ## Requirements
 
 - .NET 11 SDK
