@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="TubeSharp.Testing/TubeSharp.Testing.csproj" Id="008135c2-53ea-48fc-bc63-3d3619f644e8" />
+  <Project Path="TubeSharp/TubeSharp.csproj" />
+</Solution>
