@@ -6,7 +6,7 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		
 		<PackageId>TubeSharp</PackageId>
-		<Version>26.11.0.0-ea</Version>
+		<Version>26.11.1.0-ea</Version>
 		<Authors>Boba</Authors>
 		<Description>A lightweight, strongly typed YouTube metadata client powered by the Innertube API.</Description>
 		<PackageTags>youtube;innertube;metadata;search;nativeaot;dotnet</PackageTags>
