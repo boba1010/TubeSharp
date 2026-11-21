@@ -10,7 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="TubeSharp" Version="26.11.0-ea" />
+    <ProjectReference Include="..\TubeSharp\TubeSharp.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,5 @@
 ﻿using System.Globalization;
 using System.Text.Json;
-using TubeSharp.Channels;
 using TubeSharp.Json;
 using TubeSharp.Requests;
 
@@ -9,8 +8,27 @@ namespace TubeSharp.Videos;
 /// <inheritdoc/>
 public sealed class VideosEngine(HttpClient httpClient, string apiKey)
 {
-    private readonly string _nextUrl = $"https://youtubei.googleapis.com/youtubei/v1/next?key={apiKey}";
-    private readonly string _playerUrl = $"https://youtubei.googleapis.com/youtubei/v1/player?key={apiKey}";
+    private readonly string _nextUrl =
+        $"https://youtubei.googleapis.com/youtubei/v1/next?key={apiKey}&prettyPrint=false" +
+        "&fields=" +
+        "contents.twoColumnWatchNextResults.results.results.contents(" +
+            "videoPrimaryInfoRenderer(title,viewCount,superTitleLink)," +
+            "videoSecondaryInfoRenderer(" +
+                "owner.videoOwnerRenderer(thumbnail,title,navigationEndpoint,subscriberCountText)," +
+                "attributedDescription.content" +
+            ")" +
+        ")," +
+        "engagementPanels.engagementPanelSectionListRenderer(" +
+            "panelIdentifier," +
+            "header.engagementPanelTitleHeaderRenderer.contextualInfo," +
+            "content.structuredDescriptionContentRenderer.items.videoDescriptionHeaderRenderer.factoid(" +
+                "factoidRenderer(value.simpleText,label.simpleText,accessibilityText)" +
+            ")" +
+        ")";
+
+    private readonly string _playerUrl =
+        $"https://youtubei.googleapis.com/youtubei/v1/player?key={apiKey}&prettyPrint=false" +
+        "&fields=videoDetails.lengthSeconds,microformat.playerMicroformatRenderer(publishDate,uploadDate)";
 
     /// <inheritdoc/>
     public async Task<YoutubeVideo?> GetYoutubeVideoAsync(string id, CancellationToken cancellationToken = default)
@@ -54,94 +72,6 @@ public sealed class VideosEngine(HttpClient httpClient, string apiKey)
                 DateTimeOffset.TryParse(isoDate, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out uploadDate);
         }
 
-        return ParseMetadata(id, nextDoc.RootElement, duration, uploadDate);
-    }
-
-    private static YoutubeVideo ParseMetadata(string videoId, JsonElement root, TimeSpan duration, DateTimeOffset uploadDate)
-    {
-        var contents = root
-            .GetProperty("contents")
-            .GetProperty("twoColumnWatchNextResults")
-            .GetProperty("results")
-            .GetProperty("results")
-            .GetProperty("contents");
-
-        var primary = contents[0].GetProperty("videoPrimaryInfoRenderer");
-        var secondary = contents[1].GetProperty("videoSecondaryInfoRenderer");
-        var owner = secondary.GetProperty("owner").GetProperty("videoOwnerRenderer");
-
-        // Extract basic stats
-        string title = primary.GetProperty("title").GetProperty("runs")[0].GetProperty("text").GetString() ?? "";
-        string description = secondary.GetProperty("attributedDescription").GetProperty("content").GetString() ?? "";
-
-        long views = long.Parse(
-            primary.GetProperty("viewCount")
-                   .GetProperty("videoViewCountRenderer")
-                   .GetProperty("originalViewCount")
-                   .GetString() ?? "0"
-        );
-
-        long likes = long.Parse(
-            primary.GetProperty("videoActions")
-                   .GetProperty("menuRenderer")
-                   .GetProperty("topLevelButtons")[0]
-                   .GetProperty("segmentedLikeDislikeButtonViewModel")
-                   .GetProperty("likeCountEntity")
-                   .GetProperty("likeCountIfIndifferentNumber")
-                   .GetString() ?? "0"
-        );
-
-        // Extract hashtags
-        List<string> hashtags = [];
-        if (primary.TryGetProperty("superTitleLink", out var superTitle))
-        {
-            foreach (var run in superTitle.GetProperty("runs").EnumerateArray())
-            {
-                string? text = run.GetProperty("text").GetString();
-                if (!string.IsNullOrWhiteSpace(text))
-                    hashtags.Add(text);
-            }
-        }
-
-        // Extract comment count from engagement panels
-        string comments = "0";
-        if (root.TryGetProperty("engagementPanels", out var panels))
-        {
-            foreach (var panel in panels.EnumerateArray())
-            {
-                var renderer = panel.GetProperty("engagementPanelSectionListRenderer");
-                if (renderer.TryGetProperty("panelIdentifier", out var id) &&
-                    id.GetString() == "engagement-panel-comments-section")
-                {
-                    comments = renderer
-                        .GetProperty("header")
-                        .GetProperty("engagementPanelTitleHeaderRenderer")
-                        .GetProperty("contextualInfo")
-                        .GetProperty("runs")[0]
-                        .GetProperty("text")
-                        .GetString() ?? "0";
-                    break;
-                }
-            }
-        }
-
-        // Extract channel details
-        var avatars = owner.GetProperty("thumbnail").GetProperty("thumbnails");
-        string avatarUrl = avatars[avatars.GetArrayLength() - 1].GetProperty("url").GetString() ?? "";
-
-        var channel = new YoutubeChannel(
-            Id: owner.GetProperty("title").GetProperty("runs")[0]
-                     .GetProperty("navigationEndpoint")
-                     .GetProperty("browseEndpoint")
-                     .GetProperty("browseId").GetString() ?? "",
-            Name: owner.GetProperty("title").GetProperty("runs")[0].GetProperty("text").GetString() ?? "",
-            Handle: owner.GetProperty("navigationEndpoint")
-                         .GetProperty("browseEndpoint")
-                         .GetProperty("canonicalBaseUrl").GetString()?.TrimStart('/') ?? "",
-            Subscribers: owner.GetProperty("subscriberCountText").GetProperty("simpleText").GetString() ?? "",
-            AvatarUrl: avatarUrl
-        );
-
-        return new YoutubeVideo(videoId, title, duration, uploadDate, views, likes, comments, hashtags, channel, description);
+        return VideoResponseParser.ParseMetadata(id, nextDoc.RootElement, duration, uploadDate);
     }
 }
