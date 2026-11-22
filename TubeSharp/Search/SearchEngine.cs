@@ -117,8 +117,9 @@ public sealed class SearchEngine(HttpClient httpClient, string apiKey)
             throw new HttpRequestException($"InnerTube returned {(int)response.StatusCode}: {error}");
         }
 
-        //File.WriteAllText("response.json", await response.Content.ReadAsStringAsync());
-
+#if DEBUG
+        File.WriteAllText("response.json", await response.Content.ReadAsStringAsync());
+#endif
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
 
