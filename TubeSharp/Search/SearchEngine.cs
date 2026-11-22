@@ -37,6 +37,35 @@ public sealed class SearchEngine(HttpClient httpClient, string apiKey)
                 ")" +
             "))," +
             "continuationItemRenderer.continuationEndpoint.continuationCommand.token" +
+        ")," +
+        "onResponseReceivedCommands.appendContinuationItemsAction.continuationItems(" +
+            "itemSectionRenderer(contents(" +
+                "videoRenderer(" +
+                    "videoId," +
+                    "title.runs.text," +
+                    "lengthText.simpleText," +
+                    "viewCountText.simpleText," +
+                    "publishedTimeText.simpleText," +
+                    "thumbnail.thumbnails.url," +
+                    "ownerText.runs(text,navigationEndpoint(browseEndpoint.browseId,commandMetadata.webCommandMetadata.url))," +
+                    "channelThumbnailSupportedRenderers.channelThumbnailWithLinkRenderer.thumbnail.thumbnails.url" +
+                ")," +
+                "channelRenderer(" +
+                    "channelId," +
+                    "title," +
+                    "subscriberCountText.simpleText," +
+                    "videoCountText.simpleText," +
+                    "thumbnail.thumbnails.url" +
+                ")," +
+                "lockupViewModel(" +
+                    "contentId," +
+                    "contentType," +
+                    "metadata.lockupMetadataViewModel.title.content," +
+                    "contentImage.collectionThumbnailViewModel.primaryThumbnail.thumbnailViewModel.image.sources.url," +
+                    "contentImage.collectionThumbnailViewModel.primaryThumbnail.thumbnailViewModel.overlays.thumbnailOverlayBadgeViewModel.thumbnailBadges.thumbnailBadgeViewModel.text" +
+                ")" +
+            "))," +
+            "continuationItemRenderer.continuationEndpoint.continuationCommand.token" +
         ")";
 
     private readonly string _url =
@@ -87,6 +116,8 @@ public sealed class SearchEngine(HttpClient httpClient, string apiKey)
             string error = await response.Content.ReadAsStringAsync(cancellationToken);
             throw new HttpRequestException($"InnerTube returned {(int)response.StatusCode}: {error}");
         }
+
+        File.WriteAllText("response.json", await response.Content.ReadAsStringAsync());
 
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
