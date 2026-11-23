@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 using TubeSharp.Json;
-using TubeSharp.Search;
 
 namespace TubeSharp.Testing;
 
@@ -10,11 +9,10 @@ public partial class Program
     {
         using YoutubeClient youtube = new();
 
-        var results = new List<ISearchResult>(30);
+        var videos = await youtube.Channels.GetVideosAsync("UC_x5XG1OV2P6uZZ5FSM9Ttw");
 
-        await foreach (var result in youtube.Search.GetSearchResultRangeAsync("dotnet").Take(100))
-            results.Add(result);
+        var json = JsonSerializer.Serialize(videos, TubeSharpJsonContext.Default.IReadOnlyListYoutubeVideo);
 
-        Console.WriteLine(results.Count);
+        Console.WriteLine(json);
     }
 }

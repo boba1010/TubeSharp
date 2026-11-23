@@ -109,8 +109,6 @@ public sealed class SearchEngine(HttpClient httpClient, string apiKey)
             cancellationToken
         );
 
-        Console.WriteLine(response.StatusCode.ToString());
-
         if (!response.IsSuccessStatusCode)
         {
             string error = await response.Content.ReadAsStringAsync(cancellationToken);
@@ -118,8 +116,10 @@ public sealed class SearchEngine(HttpClient httpClient, string apiKey)
         }
 
 #if DEBUG
-        File.WriteAllText("response.json", await response.Content.ReadAsStringAsync());
+        var debugJson = await response.Content.ReadAsStringAsync(cancellationToken);
+        File.WriteAllText("response.json", debugJson);
 #endif
+
         await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
         using var doc = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
 

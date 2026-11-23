@@ -2,8 +2,8 @@
 
 internal sealed class YoutubeVideoRequest(string id)
 {
-    public string VideoId { get; set; } = id;
-    public YoutubeContext Context { get; set; } = new();
+    public string VideoId { get; } = id;
+    public YoutubeContext Context { get; } = new();
 }
 
 internal sealed class YoutubeSearchRequest(string query, string? filterParams = null, string? continuation = null)
@@ -11,6 +11,19 @@ internal sealed class YoutubeSearchRequest(string query, string? filterParams = 
     public string? Query { get; } = continuation is null ? query : null;
     public string? Params { get; } = continuation is null ? filterParams : null;
     public string? Continuation { get; } = continuation;
+    public YoutubeContext Context { get; } = new();
+}
+
+internal sealed class YoutubeChannelRequest(string id)
+{
+    public string BrowseId { get; } = id;
+    public YoutubeContext Context { get; } = new();
+}
+
+internal sealed class YoutubeChannelVideosRequest(string browseId, string? parameters)
+{
+    public string BrowseId { get; } = browseId;
+    public string? Params { get; } = parameters;
     public YoutubeContext Context { get; } = new();
 }
 

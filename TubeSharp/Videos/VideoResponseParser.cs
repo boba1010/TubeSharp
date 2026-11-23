@@ -5,7 +5,7 @@ namespace TubeSharp.Videos;
 
 internal static class VideoResponseParser
 {
-    public static YoutubeVideo ParseMetadata(string videoId, JsonElement root, TimeSpan duration, DateTimeOffset uploadDate)
+    public static YoutubeVideo ParseMetadata(string videoId, JsonElement root, TimeSpan duration, string uploadDate)
     {
         var contents = root
             .GetProperty("contents")

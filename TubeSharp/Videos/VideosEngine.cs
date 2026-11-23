@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text.Json;
+﻿using System.Text.Json;
 using TubeSharp.Json;
 using TubeSharp.Requests;
 
@@ -53,7 +52,7 @@ public sealed class VideosEngine(HttpClient httpClient, string apiKey)
         using var playerDoc = await JsonDocument.ParseAsync(playerStream, cancellationToken: cancellationToken);
 
         TimeSpan duration = TimeSpan.Zero;
-        DateTimeOffset uploadDate = DateTimeOffset.MinValue;
+        string uploadDate = "";
 
         if (playerDoc.RootElement.TryGetProperty("videoDetails", out var videoDetails) &&
             videoDetails.TryGetProperty("lengthSeconds", out var lenProp) &&
@@ -65,11 +64,10 @@ public sealed class VideosEngine(HttpClient httpClient, string apiKey)
         if (playerDoc.RootElement.TryGetProperty("microformat", out var microformat) &&
             microformat.TryGetProperty("playerMicroformatRenderer", out var microRenderer))
         {
-            string? isoDate = microRenderer.TryGetProperty("publishDate", out var pubProp)
-                ? pubProp.GetString() : microRenderer.TryGetProperty("uploadDate", out var upProp) ? upProp.GetString() : null;
-
-            if (!string.IsNullOrWhiteSpace(isoDate))
-                DateTimeOffset.TryParse(isoDate, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out uploadDate);
+            uploadDate =
+                microRenderer.TryGetProperty("publishDate", out var pubProp)
+                    ? pubProp.GetString() ?? ""
+                    : microRenderer.TryGetProperty("uploadDate", out var upProp) ? upProp.GetString() ?? "" : "";
         }
 
         return VideoResponseParser.ParseMetadata(id, nextDoc.RootElement, duration, uploadDate);

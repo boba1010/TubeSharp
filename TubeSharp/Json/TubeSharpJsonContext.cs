@@ -10,6 +10,7 @@ namespace TubeSharp.Json;
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase, WriteIndented = true)]
 [JsonSerializable(typeof(YoutubeVideo))]
 [JsonSerializable(typeof(YoutubeChannel))]
+[JsonSerializable(typeof(YoutubeChannelHome))]
 [JsonSerializable(typeof(SearchPage))]
 [JsonSerializable(typeof(VideoSearchResult))]
 [JsonSerializable(typeof(ChannelSearchResult))]
