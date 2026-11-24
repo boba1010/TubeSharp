@@ -15,7 +15,9 @@ namespace TubeSharp.Json;
 [JsonSerializable(typeof(VideoSearchResult))]
 [JsonSerializable(typeof(ChannelSearchResult))]
 [JsonSerializable(typeof(PlaylistSearchResult))]
+[JsonSerializable(typeof(ChannelVideoPage))]
 [JsonSerializable(typeof(List<ISearchResult>))]
+[JsonSerializable(typeof(List<YoutubeVideo>))]
 public sealed partial class TubeSharpJsonContext : JsonSerializerContext
 {
     /// <inheritdoc/>

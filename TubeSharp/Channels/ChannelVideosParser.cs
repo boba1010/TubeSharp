@@ -1,22 +1,21 @@
-﻿using System.Globalization;
-using System.Text.Json;
+﻿using System.Text.Json;
 using TubeSharp.Videos;
 
 namespace TubeSharp.Channels;
 
 internal static class ChannelVideosParser
 {
-    public static IReadOnlyList<YoutubeVideo> ParseVideosResponse(JsonElement root)
+    public static (IReadOnlyList<YoutubeVideo> Videos, string? Token) ParseVideosResponse(JsonElement root)
     {
         var channel = ChannelResponseParser.ParseChannelResponse(root, false);
 
         if (channel is null)
-            return [];
+            return ([], null);
 
         if (!root.TryGetProperty("contents", out var contents) ||
             !contents.TryGetProperty("twoColumnBrowseResultsRenderer", out var browse) ||
             !browse.TryGetProperty("tabs", out var tabs))
-            return [];
+            return ([], null);
 
         foreach (var tab in tabs.EnumerateArray())
         {
@@ -28,7 +27,7 @@ internal static class ChannelVideosParser
             if (!tabRenderer.TryGetProperty("content", out var content) ||
                 !content.TryGetProperty("richGridRenderer", out var grid) ||
                 !grid.TryGetProperty("contents", out var items))
-                return [];
+                return ([], null);
 
             var videos = new List<YoutubeVideo>();
 
@@ -39,92 +38,47 @@ internal static class ChannelVideosParser
                     !itemContent.TryGetProperty("lockupViewModel", out var lockup))
                     continue;
 
-                if (!TryGetString(lockup, "contentId", out var id))
-                    continue;
-
-                string videoTitle = "";
-
-                if (lockup.TryGetProperty("metadata", out var metadata) &&
-                    metadata.TryGetProperty("lockupMetadataViewModel", out var lockupMetadata) &&
-                    lockupMetadata.TryGetProperty("title", out var titleElement) &&
-                    TryGetString(titleElement, "content", out var parsedTitle))
-                {
-                    videoTitle = parsedTitle;
-                }
-
-                string durationText = GetDurationText(lockup);
-                TimeSpan duration = TimeSpan.Zero;
-
-                TryParseDuration(durationText, out duration);
-
-                var metadataValues = GetMetadataValues(lockup);
-
-                string views = metadataValues.ElementAtOrDefault(0) ?? "";
-                string uploadDate = metadataValues.ElementAtOrDefault(1) ?? "";
-
-                videos.Add(new YoutubeVideo(id, videoTitle, duration, uploadDate, views, null, null, null, channel, null));
+                if (ChannelCommonParser.TryParseVideo(lockup, channel, out var video))
+                    videos.Add(video);
             }
 
-            return videos;
+            var token = GetContinuationToken(items);
+
+            return (videos, token);
         }
 
-        return [];
+        return ([], null);
     }
 
-    private static List<string> GetMetadataValues(JsonElement lockup)
+    public static (IReadOnlyList<YoutubeVideo> Videos, string? Token) ParseNextPageResponse(JsonElement root, YoutubeChannel channel)
     {
-        var values = new List<string>();
+        if (!root.TryGetProperty("onResponseReceivedActions", out var actions) ||
+            actions.ValueKind != JsonValueKind.Array)
+            return ([], null);
 
-        if (!lockup.TryGetProperty("metadata", out var metadata) ||
-            !metadata.TryGetProperty("lockupMetadataViewModel", out var lockupMetadata) ||
-            !lockupMetadata.TryGetProperty("metadata", out var metadataContainer) ||
-            !metadataContainer.TryGetProperty("contentMetadataViewModel", out var contentMetadata) ||
-            !contentMetadata.TryGetProperty("metadataRows", out var rows))
-            return values;
-
-        if (rows.GetArrayLength() == 0)
-            return values;
-
-        // The final row contains views and upload date.
-        var lastRow = rows[rows.GetArrayLength() - 1];
-
-        if (!lastRow.TryGetProperty("metadataParts", out var parts))
-            return values;
-
-        foreach (var part in parts.EnumerateArray())
+        foreach (var action in actions.EnumerateArray())
         {
-            if (part.TryGetProperty("text", out var text) && TryGetString(text, "content", out var value))
-                values.Add(value);
-        }
-
-        return values;
-    }
-
-    private static string GetDurationText(JsonElement lockup)
-    {
-        if (!lockup.TryGetProperty("contentImage", out var contentImage) ||
-            !contentImage.TryGetProperty("thumbnailViewModel", out var thumbnail) ||
-            !thumbnail.TryGetProperty("overlays", out var overlays))
-            return "";
-
-        foreach (var overlay in overlays.EnumerateArray())
-        {
-            if (!overlay.TryGetProperty("thumbnailBottomOverlayViewModel", out var bottomOverlay) ||
-                !bottomOverlay.TryGetProperty("badges", out var badges))
+            if (!action.TryGetProperty("appendContinuationItemsAction", out var append) ||
+                !append.TryGetProperty("continuationItems", out var items))
                 continue;
 
-            foreach (var badge in badges.EnumerateArray())
+            var videos = new List<YoutubeVideo>();
+
+            foreach (var item in items.EnumerateArray())
             {
-                if (!badge.TryGetProperty("thumbnailBadgeViewModel", out var badgeView) ||
-                    !TryGetString(badgeView, "text", out var text))
+                if (!item.TryGetProperty("richItemRenderer", out var richItem) ||
+                    !richItem.TryGetProperty("content", out var content) ||
+                    !content.TryGetProperty("lockupViewModel", out var lockup))
                     continue;
 
-                if (TryParseDuration(text, out _))
-                    return text;
+                if (ChannelCommonParser.TryParseVideo(lockup, channel, out var video))
+                    videos.Add(video);
             }
+
+            return (videos, GetContinuationToken(items));
         }
 
-        return "";
+        return ([], null);
     }
 
     private static string? GetContinuationToken(JsonElement items)
@@ -141,11 +95,6 @@ internal static class ChannelVideosParser
         }
 
         return null;
-    }
-
-    private static bool TryParseDuration(string text, out TimeSpan duration)
-    {
-        return TimeSpan.TryParseExact(text, ["m\\:ss", "mm\\:ss", "h\\:mm\\:ss", "hh\\:mm\\:ss"], CultureInfo.InvariantCulture, out duration);
     }
 
     private static bool TryGetString(JsonElement element, string property, out string value)

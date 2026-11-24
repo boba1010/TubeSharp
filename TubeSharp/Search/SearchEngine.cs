@@ -102,12 +102,7 @@ public sealed class SearchEngine(HttpClient httpClient, string apiKey)
 
     private async Task<SearchPage> ExecuteSearchAsync(YoutubeSearchRequest request, CancellationToken cancellationToken)
     {
-        using var response = await httpClient.PostAsJsonAsync(
-            _url,
-            request,
-            InnerTubeJsonContext.Default.YoutubeSearchRequest,
-            cancellationToken
-        );
+        using var response = await httpClient.PostAsJsonAsync(_url, request, InnerTubeJsonContext.Default.YoutubeSearchRequest, cancellationToken);
 
         if (!response.IsSuccessStatusCode)
         {

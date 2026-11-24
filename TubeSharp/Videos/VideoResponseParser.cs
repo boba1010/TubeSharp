@@ -117,7 +117,7 @@ internal static class VideoResponseParser
             AvatarUrl: avatarUrl
         );
 
-        return new YoutubeVideo(videoId, title, duration, uploadDate, views, likes, comments, hashtags, channel, description);
+        return new YoutubeVideo(videoId, title, duration, uploadDate, views, likes, comments, hashtags, channel, description, null);
     }
 
     private static string ParseLikes(JsonElement root)

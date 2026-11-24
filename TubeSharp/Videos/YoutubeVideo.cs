@@ -4,10 +4,11 @@ namespace TubeSharp.Videos;
 
 /// <inheritdoc/>
 public sealed record class YoutubeVideo(
-    string Id, string Title, 
+    string Id, string Title,
     TimeSpan Duration, string UploadDate, 
     string Views, string? Likes, string? Comments, 
-    List<string>? Hashtags, YoutubeChannel Channel, string? Description)
+    List<string>? Hashtags, YoutubeChannel Channel,
+    string? Description, string? Thumbnail)
 {
     /// <inheritdoc/>
     public string Url => $"https://youtube.com/watch?v={Id}";

@@ -27,6 +27,12 @@ internal sealed class YoutubeChannelVideosRequest(string browseId, string? param
     public YoutubeContext Context { get; } = new();
 }
 
+internal sealed class YoutubeChannelVideosNextPageRequest(string continuationToken)
+{
+    public string Continuation { get; } = continuationToken;
+    public YoutubeContext Context { get; } = new();
+}
+
 internal static class SearchFilters
 {
     public const string Videos = "EgIQAQ%3D%3D";
