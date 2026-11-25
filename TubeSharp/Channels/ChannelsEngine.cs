@@ -66,6 +66,7 @@ public sealed class ChannelsEngine(HttpClient httpClient, string apikey)
             "content.sectionListRenderer.contents(" +
                 "itemSectionRenderer.contents.shelfRenderer(" +
                     "title," +
+                    "subtitle.simpleText," +
                     "endpoint.commandMetadata.webCommandMetadata.url," +
                     "content.horizontalListRenderer.items.lockupViewModel(" +
                         "contentId," +
@@ -165,6 +166,7 @@ public sealed class ChannelsEngine(HttpClient httpClient, string apikey)
 
         var request = new YoutubeChannelRequest(channelId);
 
+        //using var response = await httpClient.PostAsJsonAsync(ChannelHomeEndpoint, request, InnerTubeJsonContext.Default.YoutubeChannelRequest, cancellationToken);
         using var response = await httpClient.PostAsJsonAsync(ChannelHomeEndpoint, request, InnerTubeJsonContext.Default.YoutubeChannelRequest, cancellationToken);
 
         if (!response.IsSuccessStatusCode)

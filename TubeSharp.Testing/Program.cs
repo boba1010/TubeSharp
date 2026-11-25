@@ -9,11 +9,10 @@ public partial class Program
     {
         using YoutubeClient youtube = new();
 
-        var channel = await youtube.Channels.GetVideosRangeAsync("UC_x5XG1OV2P6uZZ5FSM9Ttw").Take(50).ToListAsync();
+        var channel = await youtube.Channels.GetHomeAsync("UC_x5XG1OV2P6uZZ5FSM9Ttw");
 
-        var json = JsonSerializer.Serialize(channel, TubeSharpJsonContext.Default.ListYoutubeVideo);
+        var json = JsonSerializer.Serialize(channel, TubeSharpJsonContext.Default.YoutubeChannelHome);
 
         Console.WriteLine(json);
-        Console.WriteLine(channel.Count);
     }
 }

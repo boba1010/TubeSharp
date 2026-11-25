@@ -42,6 +42,7 @@ internal static class ChannelHomeParser
                     if (!item.TryGetProperty("shelfRenderer", out var shelf))
                         continue;
 
+                    string? subtitleText = GetText(shelf, "subtitle");
                     string title = GetText(shelf, "title");
                     string? url = GetEndpointUrl(shelf, "endpoint");
 
@@ -61,7 +62,7 @@ internal static class ChannelHomeParser
                         }
                     }
 
-                    shelves.Add(new YoutubeChannelShelf(title, url, videos));
+                    shelves.Add(new YoutubeChannelShelf(title, subtitleText, url, videos));
                 }
             }
 
