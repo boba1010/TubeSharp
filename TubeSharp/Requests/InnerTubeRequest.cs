@@ -20,6 +20,18 @@ internal sealed class YoutubeChannelRequest(string id)
     public YoutubeContext Context { get; } = new();
 }
 
+internal sealed class YoutubePlaylistRequest(string id)
+{
+    public string BrowseId { get; } = id;
+    public YoutubeContext Context { get; } = new();
+}
+
+internal sealed class YoutubePlaylistNextPageRequest(string continuationToken)
+{
+    public string Continuation { get; } = continuationToken;
+    public YoutubeContext Context { get; } = new();
+}
+
 internal sealed class YoutubeChannelVideosRequest(string browseId, string? parameters)
 {
     public string BrowseId { get; } = browseId;

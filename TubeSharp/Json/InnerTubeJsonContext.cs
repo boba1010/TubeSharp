@@ -11,6 +11,6 @@ namespace TubeSharp.Json;
 [JsonSerializable(typeof(YoutubeChannelRequest))]
 [JsonSerializable(typeof(YoutubeChannelVideosRequest))]
 [JsonSerializable(typeof(YoutubeChannelVideosNextPageRequest))]
-[JsonSerializable(typeof(YoutubeContext))]
-[JsonSerializable(typeof(YoutubeClientMetadata))]
+[JsonSerializable(typeof(YoutubePlaylistRequest))]
+[JsonSerializable(typeof(YoutubePlaylistNextPageRequest))]
 internal sealed partial class InnerTubeJsonContext : JsonSerializerContext;

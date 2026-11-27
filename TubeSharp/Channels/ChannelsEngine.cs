@@ -7,10 +7,10 @@ using TubeSharp.Videos;
 namespace TubeSharp.Channels;
 
 /// <inheritdoc/>
-public sealed class ChannelsEngine(HttpClient httpClient, string apikey)
+public sealed class ChannelsEngine(HttpClient httpClient, string apiKey)
 {
     private readonly string BrowseEndpoint =
-        $"https://youtubei.googleapis.com/youtubei/v1/browse?key={apikey}&prettyPrint=false" +
+        $"https://youtubei.googleapis.com/youtubei/v1/browse?key={apiKey}&prettyPrint=false" +
         "&fields=" +
         "metadata.channelMetadataRenderer(" +
             "title," +
@@ -37,7 +37,7 @@ public sealed class ChannelsEngine(HttpClient httpClient, string apikey)
         ")";
 
     private readonly string ChannelHomeEndpoint =
-        $"https://youtubei.googleapis.com/youtubei/v1/browse?key={apikey}&prettyPrint=false" +
+        $"https://youtubei.googleapis.com/youtubei/v1/browse?key={apiKey}&prettyPrint=false" +
         "&fields=" +
         "header.pageHeaderRenderer.content.pageHeaderViewModel(" +
             "title.dynamicTextViewModel(" +
@@ -84,7 +84,7 @@ public sealed class ChannelsEngine(HttpClient httpClient, string apikey)
         ")";
 
     private readonly string ChannelVideosEndpoint =
-        $"https://youtubei.googleapis.com/youtubei/v1/browse?key={apikey}&prettyPrint=false" +
+        $"https://youtubei.googleapis.com/youtubei/v1/browse?key={apiKey}&prettyPrint=false" +
         "&fields=" +
         "header," +
         "metadata.channelMetadataRenderer," +
@@ -111,7 +111,7 @@ public sealed class ChannelsEngine(HttpClient httpClient, string apikey)
         ")";
 
     private readonly string ChannelVideosNextPageEndpoint =
-        $"https://youtubei.googleapis.com/youtubei/v1/browse?key={apikey}&prettyPrint=false" +
+        $"https://youtubei.googleapis.com/youtubei/v1/browse?key={apiKey}&prettyPrint=false" +
         "&fields=" +
         "onResponseReceivedActions.appendContinuationItemsAction.continuationItems(" +
             "richItemRenderer.content.lockupViewModel(" +

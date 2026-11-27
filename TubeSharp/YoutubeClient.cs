@@ -1,4 +1,5 @@
 ﻿using TubeSharp.Channels;
+using TubeSharp.Playlists;
 using TubeSharp.Search;
 using TubeSharp.Videos;
 
@@ -21,6 +22,9 @@ public sealed class YoutubeClient : IDisposable
     public ChannelsEngine Channels { get; }
 
     /// <inheritdoc/>
+    public PlaylistsEngine Playlists { get; }
+
+    /// <inheritdoc/>
     public YoutubeClient() 
     {
         _client = new();
@@ -33,6 +37,7 @@ public sealed class YoutubeClient : IDisposable
         Videos = new(_client, ApiKey);
         Search = new(_client, ApiKey);
         Channels = new(_client, ApiKey);
+        Playlists = new(_client, ApiKey);
     }
 
     /// <inheritdoc/>
@@ -42,6 +47,7 @@ public sealed class YoutubeClient : IDisposable
         Videos = new(_client, ApiKey);
         Search = new(_client, ApiKey);
         Channels = new(_client, ApiKey);
+        Playlists = new(_client, ApiKey);
     }
 
     /// <inheritdoc/>

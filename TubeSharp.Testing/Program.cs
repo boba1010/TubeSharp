@@ -9,9 +9,9 @@ public partial class Program
     {
         using YoutubeClient youtube = new();
 
-        var channel = await youtube.Channels.GetHomeAsync("UC_x5XG1OV2P6uZZ5FSM9Ttw");
+        var playlist = await youtube.Playlists.GetVideosAsync("PLxLYo5_7D3SdgAFYzYETPDDVBt6DRqVE0");
 
-        var json = JsonSerializer.Serialize(channel, TubeSharpJsonContext.Default.YoutubeChannelHome);
+        var json = JsonSerializer.Serialize(playlist, TubeSharpJsonContext.Default.PlaylistPage);
 
         Console.WriteLine(json);
     }
