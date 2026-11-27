@@ -1,6 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Text.Json;
-using System.Threading.Channels;
 using TubeSharp.Json;
 using TubeSharp.Requests;
 using TubeSharp.Videos;

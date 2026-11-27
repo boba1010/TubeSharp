@@ -2,7 +2,7 @@
 
 **A lightweight, strongly typed, NativeAOT-compatible C# library for retrieving YouTube metadata.**
 
-TubeSharp provides a clean .NET interface for interacting with YouTube's internal Innertube API. Search for videos, channels, and playlists, or retrieve detailed metadata for individual videos and YouTube channels.
+TubeSharp provides a clean .NET interface for interacting with YouTube's internal Innertube API. Search for videos, channels, and playlists, or retrieve detailed metadata and content from individual videos, YouTube channels, and playlists.
 
 TubeSharp is designed around metadata retrieval and parsing. It does not provide video or audio downloading, streaming, or playback functionality.
 
@@ -14,8 +14,10 @@ TubeSharp is designed around metadata retrieval and parsing. It does not provide
 - **Channel metadata:** Retrieve channel IDs, names, handles, subscriber counts, avatars, banners, descriptions, verification status, video counts, and available tabs.
 - **Channel Home:** Retrieve channel Home content, including video shelves and their associated videos.
 - **Channel Videos:** Retrieve videos displayed in a channel's Videos tab.
-- **Pagination:** Retrieve subsequent search results using continuation tokens.
-- **Async enumeration:** Iterate through search results without manually managing pages.
+- **Playlist metadata:** Retrieve playlist IDs, titles, descriptions, video counts, thumbnails, and associated channel information.
+- **Playlist Videos:** Retrieve videos contained in a playlist.
+- **Pagination:** Retrieve subsequent search, channel, and playlist results using continuation tokens.
+- **Async enumeration:** Iterate through available search results and playlist videos without manually managing pages.
 - **Cancellation support:** Pass cancellation tokens to asynchronous operations.
 - **NativeAOT compatibility:** Uses source-generated JSON serialization and avoids requiring runtime reflection for request serialization.
 - **HttpClient integration:** Supports both internally managed and externally supplied HttpClient instances.
@@ -33,15 +35,19 @@ Instead of retrieving entire API responses, TubeSharp requests only the response
 |---|---:|---:|---:|
 | Video metadata (`/next`) | ~1.2 MB | **2.77 KB** | **~99.77%** |
 | Search (`/search`) | ~2.61 MB | **47 KB** | **~98.2%** |
-| Channel Home (`/browse`) | ~2 MB | **35 KB** | **~98.3%** |
-| Channel Videos (`/browse`) | Original response | Optimized response | **95%+** |
+| Channel Home (`/browse`) | ~2 MB | **28 KB** | **~98.3%** |
+| Channel Videos (`/browse`) | ~2MB | ~48KB | **97.6%** |
+| Playlist metadata (/browse) | ~5 MB | ~2KB | ~99.96% |
+| Playlist videos (/browse) | ~5 MB | ~180 KB | ~96.4% |
 
 ### Optimization Results
 
 - **Video metadata:** Approximately 433× less response data.
 - **Search:** Approximately 55× less response data.
 - **Channel Home:** Approximately 58× less response data.
-- **Channel Videos:** More than 95% less response data.
+- **Channel Videos:** Approximately 97.6% less response data.
+- **Playlist metadata:** Approximately 2,500× less response data.
+- **Playlist videos:** Approximately 27.8× less response data.
 - **Reduced JSON processing:** Unnecessary response data is filtered out before reaching the parser.
 - **Lower memory pressure:** Smaller response payloads can reduce buffering and JSON-processing memory requirements.
 
@@ -87,13 +93,14 @@ foreach (var result in page.Results)
 }
 ```
 
-`YoutubeClient` exposes three engines:
+`YoutubeClient` exposes four engines:
 
 | Engine | Purpose |
 |---|---|
 | `Search` | Search YouTube and retrieve paginated search results. |
 | `Videos` | Retrieve detailed metadata for individual videos. |
 | `Channels` | Retrieve channel metadata and channel content. |
+| `Playlists` | Retrieve playlist metadata and playlist videos. |
 
 ## Searching
 
@@ -147,9 +154,7 @@ Cancellation is supported:
 ```csharp
 using var cts = new CancellationTokenSource();
 
-await foreach (var result in youtube.Search.GetSearchResultRangeAsync(
-    "C# programming",
-    cts.Token))
+await foreach (var result in youtube.Search.GetSearchResultRangeAsync("C# programming", cts.Token))
 {
     Console.WriteLine(result.Title);
 }
@@ -196,8 +201,7 @@ A video may return `null` when the required API requests fail.
 Retrieve a channel using its channel ID:
 
 ```csharp
-var channel = await youtube.Channels.GetChannelAsync(
-    "UC_x5XG1OV2P6uZZ5FSM9Ttw");
+var channel = await youtube.Channels.GetChannelAsync("UC_x5XG1OV2P6uZZ5FSM9Ttw");
 
 if (channel is not null)
 {
@@ -242,8 +246,7 @@ These properties allow TubeSharp to construct subsequent requests for individual
 Retrieve the Home section of a channel:
 
 ```csharp
-var home = await youtube.Channels.GetHomeAsync(
-    "UC_x5XG1OV2P6uZZ5FSM9Ttw");
+var home = await youtube.Channels.GetHomeAsync("UC_x5XG1OV2P6uZZ5FSM9Ttw");
 ```
 
 The Home response contains channel shelves and their associated video collections.
@@ -261,8 +264,7 @@ The available shelf metadata depends on the response provided by YouTube.
 Retrieve videos displayed in a channel's Videos tab:
 
 ```csharp
-var videos = await youtube.Channels.GetVideosAsync(
-    "UC_x5XG1OV2P6uZZ5FSM9Ttw");
+var videos = await youtube.Channels.GetVideosAsync("UC_x5XG1OV2P6uZZ5FSM9Ttw");
 
 foreach (var video in videos)
 {
@@ -273,6 +275,92 @@ foreach (var video in videos)
 ```
 
 TubeSharp uses the channel's Videos tab information to construct the corresponding Innertube browse request.
+
+## Retrieving Playlist Metadata
+
+`PlaylistsEngine` provides methods for retrieving playlist information and its video contents.
+
+### Playlist information
+
+Retrieve a playlist using its YouTube playlist ID:
+
+```csharp
+var playlist = await youtube.Playlists.GetPlaylistAsync("PLAYLIST_ID");
+
+Console.WriteLine(playlist.Title);
+Console.WriteLine(playlist.Description);
+Console.WriteLine(playlist.Count);
+Console.WriteLine(playlist.Thumbnail);
+
+if (playlist.Channel is not null)
+{
+    Console.WriteLine(playlist.Channel.Name);
+    Console.WriteLine(playlist.Channel.Url);
+}
+```
+
+Playlist metadata includes:
+
+- Playlist ID
+- Title
+- Description
+- Video count
+- Thumbnail URL
+- Associated channel information, when available
+
+### Playlist videos
+
+Retrieve the first page of playlist videos:
+
+```csharp
+var page = await youtube.Playlists.GetVideosAsync("PLAYLIST_ID");
+
+foreach (var video in page.Videos)
+{
+    Console.WriteLine(video.Title);
+    Console.WriteLine(video.Duration);
+    Console.WriteLine(video.Url);
+}
+```
+
+The returned `PlaylistPage` contains:
+
+- `Videos`: A collection of `YoutubeVideo` objects.
+- `ContinuationToken`: A token for retrieving the next page, if available.
+
+### Playlist pagination
+
+Retrieve subsequent pages using the continuation token:
+
+```csharp
+if (page.ContinuationToken is { } token)
+{
+    var nextPage = await youtube.Playlists.GetNextVideosPageAsync(token);
+}
+```
+
+### Asynchronous enumeration
+
+For automatically iterating through playlist videos and their available pages, use `GetVideosRangedAsync`.
+
+```csharp
+await foreach (var video in youtube.Playlists.GetVideosRangedAsync("PLAYLIST_ID"))
+{
+    Console.WriteLine(video.Title);
+    Console.WriteLine(video.Url);
+}
+```
+
+Cancellation is supported:
+
+```csharp
+using var cts = new CancellationTokenSource();
+
+await foreach (var video in youtube.Playlists.GetVideosRangedAsync("PLAYLIST_ID", cts.Token))
+{
+    Console.WriteLine(video.Title);
+}
+```
 
 ## HttpClient
 
@@ -314,7 +402,7 @@ TubeSharp relies on YouTube's internal Innertube API, which is not a stable publ
 
 YouTube may change its response structures, endpoints, or behavior at any time. Such changes may require updates to TubeSharp's parsers.
 
-Metadata availability also depends on the video, channel, and the responses provided by YouTube.
+Metadata availability also depends on the video, channel, playlist, and the responses provided by YouTube.
 
 ## License
 
